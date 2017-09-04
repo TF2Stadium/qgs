@@ -1,0 +1,44 @@
+{
+  "name": "quick-game-servers-backend",
+  "version": "0.0.1",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node bin/server",
+    "start:dev": "nodemon bin/server",
+    "build": "rm -rf dist;babel --source-maps=inline --out-dir dist src",
+    "build:watch": "npm run build -- -w",
+    "lint": "eslint --cache src/**.js bin/**.js",
+    "test": "echo \"Error: no test specified\""
+  },
+  "keywords": [],
+  "author": "TF2Stadium",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "babel-polyfill": "6.26.0",
+    "backend": "^0.0.0",
+    "body-parser": "1.17.2",
+    "cookie-parser": "1.4.3",
+    "debug": "3.0.1",
+    "express": "4.15.4",
+    "express-jwt": "5.3.0",
+    "ineedthis": "0.0.8",
+    "localenv": "0.2.2",
+    "morgan": "1.8.2",
+    "most": "1.7.0",
+    "passport": "^0.4.0",
+    "passport-steam": "^1.0.8",
+    "pg": "7.2.0",
+    "ramda": "0.24.1",
+    "ws": "3.1.0"
+  },
+  "devDependencies": {
+    "babel-cli": "6.26.0",
+    "babel-eslint": "7.2.3",
+    "babel-preset-env": "1.6.0",
+    "eslint": "4.6.0",
+    "nodemon": "1.11.0",
+    "source-map-support": "0.4.16"
+  }
+}

@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+
+require('localenv');
+require('babel-polyfill');
+require('source-map-support').install();
+
+var ineedthis = require('ineedthis'),
+  start = ineedthis.start,
+  stop = ineedthis.stop;
+
+start(require('../dist/systems/server').default)
+  .then(function (system) {
+    var stopping = false;
+    process.on('SIGINT', function () {
+      if (stopping) {
+        process.exit(1);
+      }
+      stopping = true;
+      stop(system);
+    });
+  })
+  .catch(err => {
+    console.error(err);
+    stop(system).then(
+      () => process.exit(1),
+      err => {
+        console.error(err);
+        process.exit(1);
+      }
+    );
+  });
