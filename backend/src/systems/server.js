@@ -1,5 +1,6 @@
 import {createService} from 'ineedthis';
 import dbService from './db';
+import postgraphqlService from './postgraphql';
 import ms from 'ms';
 import configurationService from './config';
 import {tx, oneOrNone} from '../dbHelpers';
@@ -22,15 +23,16 @@ const debug = createDebug('backend');
 const p = routeFn => (req, res, next) => routeFn(req, res, next).catch(next);
 
 export default createService('qgs/server', {
-  dependencies: [dbService, configurationService],
+  dependencies: [dbService, configurationService, postgraphqlService],
   start: () => ({
     [dbService.serviceName]: db,
     [configurationService.serviceName]: env,
-  }) => createServer(db, env),
+    [postgraphqlService.serviceName]: postgraphql,
+  }) => createServer(db, env, postgraphql),
   stop: listener => new Promise(resolve => listener.close(resolve)),
 });
 
-async function createServer(db, env) {
+async function createServer(db, env, postgraphql) {
   const app = express();
 
   const strat = new SteamStrategy({
@@ -50,9 +52,18 @@ async function createServer(db, env) {
     issuer: env.jwt.issuer,
     secret: env.jwt.secret,
     getToken: req => req.cookies[env.jwt.cookieName],
-  }).unless({path: ['/api/authorize', '/api/authorize/return']}));
+  }).unless({
+    path: [
+      '/api/authorize',
+      '/api/authorize/return',
+      '/api/graphiql',
+      '/api/graphql',
+      /\/_postgraphql\/.*/,
+      /\/api\/pql\/.*/
+    ]
+  }));
   app.use(passport.initialize());
-
+  app.use(postgraphql);
   app.use('/api', createRouter(db, env, passport));
 
   if (env.isProd) {
