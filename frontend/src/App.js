@@ -6,6 +6,7 @@ import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
 import theme from './theme';
+import signin from './sign-in-through-steam.png';
 
 const Title = styled(Typography)`
 flex: 1;
@@ -19,13 +20,19 @@ const Content = styled.main`
 margin: 75px 20px 20px ${theme.drawerWidth}px;
 `;
 
+const LoginButton = (
+  <Button color='contrast' href='/authorize'>
+    <img src={signin} alt='Login'/>
+  </Button>
+);
+
 export default function App() {
   return (
     <AppContainer>
       <AppBar>
         <Toolbar>
           <Title type='title' color='inherit'>Quick Game Servers</Title>
-          <Button color='contrast'>Login</Button>
+          {LoginButton}
         </Toolbar>
       </AppBar>
       <AppDrawer/>
@@ -40,8 +47,9 @@ export default function App() {
         </Typography>
         <br/>
         <Typography type='headline'>
-          <Button>Login</Button> with steam now to get started with 3$
-          of free credit (about 30 hours of 6v6 server time).
+          {LoginButton}
+          Login now to get started with 3$ of free credit
+          (about 30 hours of 6v6 server time).
         </Typography>
       </Content>
     </AppContainer>
