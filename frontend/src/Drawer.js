@@ -4,6 +4,10 @@ import MuiDrawer from 'material-ui/Drawer';
 import List, {ListItem, ListItemText} from 'material-ui/List';
 import theme from './theme';
 import Divider from 'material-ui/Divider';
+import Collapse from 'material-ui/transitions/Collapse';
+import ExpandLess from 'material-ui-icons/ExpandLess';
+import ExpandMore from 'material-ui-icons/ExpandMore';
+import {withState} from 'recompose';
 
 const DrawerInner = styled.div`
 // Make the items inside not wrap when transitioning:
@@ -21,28 +25,49 @@ height: auto;
 width: ${theme.drawerWidth}px;
 `;
 
-export default function AppDrawer({open}) {
+const NestedItemText = styled(ListItemText)`
+text-indent: 20px;
+`;
+
+function AppDrawer({collapsed, setCollapsed}) {
   return (
     <Drawer type='permanent' open={true}>
       <DrawerInner>
         <List>
-          <ListItem button>
-            <ListItemText primary='Trash' />
+          <ListItem button onClick={() => setCollapsed(!collapsed)}>
+            <ListItemText primary='Servers' />
+            {collapsed ? <ExpandMore /> : <ExpandLess />}
           </ListItem>
+          <Collapse in={collapsed}>
+            <List>
+            <ListItem button>
+              <NestedItemText primary='Server 1' />
+            </ListItem>
+            <ListItem button>
+              <NestedItemText primary='Server 2 (long text long text)' />
+            </ListItem>
+            <ListItem button>
+              <NestedItemText primary='Server 3' />
+            </ListItem>
+            </List>
+          </Collapse>
+
           <ListItem button>
-            <ListItemText primary='Trash' />
+            <ListItemText primary='Balance' />
           </ListItem>
         </List>
         <Divider />
         <List>
-          <ListItem button>
-            <ListItemText primary='Trash' />
-          </ListItem>
-          <ListItem button>
-            <ListItemText primary='Trash' />
+          <ListItem
+            button
+            component='a'
+            href='/api/authorize/logout'>
+            <ListItemText primary='Logout' />
           </ListItem>
         </List>
       </DrawerInner>
     </Drawer>
   );
 }
+
+export default withState('collapsed', 'setCollapsed', false)(AppDrawer);
