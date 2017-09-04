@@ -5,6 +5,7 @@ import {MuiThemeProvider} from 'material-ui/styles';
 import theme from './theme';
 import registerServiceWorker from './registerServiceWorker';
 import {parse} from 'cookie';
+import {BrowserRouter} from 'react-router-dom';
 import {start, createService} from 'ineedthis';
 
 const UserService = createService('qgs/client/user', {
@@ -35,7 +36,6 @@ function useServices(
 
     async componentWillMount() {
       const sys = await start(Object.values(servicesMap));
-      console.log('initd', sys);
       const newChildProps = {};
       for (const [prop, s] of Object.entries(servicesMap)) {
         newChildProps[prop] = sys[s.serviceName];
@@ -59,7 +59,9 @@ const ServicedApp = useServices(
 
 ReactDOM.render((
   <MuiThemeProvider theme={theme}>
-    <ServicedApp />
+    <BrowserRouter>
+      <ServicedApp/>
+    </BrowserRouter>
   </MuiThemeProvider>
 ), document.getElementById('root'));
 registerServiceWorker();

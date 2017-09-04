@@ -1,12 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 import AppDrawer from './Drawer';
-import Button from 'material-ui/Button';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
-import theme from './theme';
-import signin from './sign-in-through-steam.png';
+import ServerCreate from './ServerCreate';
+import {Switch, Route, Redirect} from 'react-router-dom';
+import {Content, LoginButton} from './Components';
 
 const Title = styled(Typography)`
 flex: 1;
@@ -16,14 +16,39 @@ const AppContainer = styled.div`
 width: 100%;
 `;
 
-const Content = styled.main`
-margin: 75px 20px 20px ${theme.drawerWidth}px;
-`;
+const Main = () => (
+  <Content>
+    <Typography type='display3'>
+      Quick Game Servers
+    </Typography>
+    <br/>
+    <Typography type='headline'>
+      Quickly and cheaply launch temporary TF2 servers anywhere in
+      the world!
+    </Typography>
+    <br/>
+    <Typography type='headline'>
+      {LoginButton}
+      Login now to get started with 3$ of free credit
+      (about 30 hours of 6v6 server time).
+    </Typography>
+  </Content>
+);
 
-const LoginButton = (
-  <Button color='contrast' href='/api/authorize'>
-    <img src={signin} alt='Login'/>
-  </Button>
+const About = () => (
+  <Content>
+    <Typography type='display2'>
+      Contact Quick Game Servers
+    </Typography>
+    <br/>
+    <Typography type='headline'>
+      Email us:
+    </Typography>
+    <br/>
+    <Typography type='headline'>
+      Or chat on the TF2Stadium discord:
+    </Typography>
+  </Content>
 );
 
 export default function App({isLoading, user}) {
@@ -35,23 +60,22 @@ export default function App({isLoading, user}) {
           {user ? null : LoginButton}
         </Toolbar>
       </AppBar>
-      <Content>
-        {user ? <AppDrawer/> : null}
-        <Typography type='display3'>
-          Quick Game Servers
-        </Typography>
-        <br/>
-        <Typography type='headline'>
-          Quickly and cheaply launch temporary TF2 servers anywhere in
-          the world!
-        </Typography>
-        <br/>
-        <Typography type='headline'>
-          {LoginButton}
-          Login now to get started with 3$ of free credit
-          (about 30 hours of 6v6 server time).
-        </Typography>
-      </Content>
+      {user ? <AppDrawer/> : null}
+
+      {user ? (
+        <Switch>
+          <Route path='/server/create' component={ServerCreate}/>
+          <Route path='/about' component={About}/>
+          <Route path='/' exact={true} component={Main}/>
+          <Redirect to='/'/>
+        </Switch>
+      ) : (
+        <Switch>
+          <Route path='/about' component={About}/>
+          <Route path='/' exact={true} component={Main}/>
+          <Redirect to='/'/>
+        </Switch>
+      )}
     </AppContainer>
   );
 }

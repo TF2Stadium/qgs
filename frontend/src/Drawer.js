@@ -8,6 +8,8 @@ import Collapse from 'material-ui/transitions/Collapse';
 import ExpandLess from 'material-ui-icons/ExpandLess';
 import ExpandMore from 'material-ui-icons/ExpandMore';
 import {withState} from 'recompose';
+import {Link} from 'react-router-dom';
+import Add from 'material-ui-icons/Add';
 
 const DrawerInner = styled.div`
 // Make the items inside not wrap when transitioning:
@@ -34,26 +36,42 @@ function AppDrawer({collapsed, setCollapsed}) {
     <Drawer type='permanent' open={true}>
       <DrawerInner>
         <List>
+          <ListItem
+            button
+            component={Link}
+            to='/server/create'>
+            <ListItemText primary='Launch Server' />
+            <Add/>
+          </ListItem>
           <ListItem button onClick={() => setCollapsed(!collapsed)}>
             <ListItemText primary='Servers' />
-            {collapsed ? <ExpandMore /> : <ExpandLess />}
+            {collapsed ? <ExpandMore/> : <ExpandLess/>}
           </ListItem>
           <Collapse in={collapsed}>
             <List>
-            <ListItem button>
-              <NestedItemText primary='Server 1' />
-            </ListItem>
-            <ListItem button>
-              <NestedItemText primary='Server 2 (long text long text)' />
-            </ListItem>
-            <ListItem button>
-              <NestedItemText primary='Server 3' />
-            </ListItem>
+              <ListItem button>
+                <NestedItemText primary='Server 1' />
+              </ListItem>
+              <ListItem button>
+                <NestedItemText primary='Server 2 (long text long text)' />
+              </ListItem>
+              <ListItem button>
+                <NestedItemText primary='Server 3' />
+              </ListItem>
             </List>
           </Collapse>
 
           <ListItem button>
             <ListItemText primary='Balance' />
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem
+            button
+            component={Link}
+            to='/about'>
+            <ListItemText primary='About' />
           </ListItem>
         </List>
         <Divider />
