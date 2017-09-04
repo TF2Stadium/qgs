@@ -21,22 +21,22 @@ margin: 75px 20px 20px ${theme.drawerWidth}px;
 `;
 
 const LoginButton = (
-  <Button color='contrast' href='/authorize'>
+  <Button color='contrast' href='/api/authorize'>
     <img src={signin} alt='Login'/>
   </Button>
 );
 
-export default function App() {
+export default function App({isLoading, user}) {
   return (
     <AppContainer>
       <AppBar>
         <Toolbar>
           <Title type='title' color='inherit'>Quick Game Servers</Title>
-          {LoginButton}
+          {user ? null : LoginButton}
         </Toolbar>
       </AppBar>
-      <AppDrawer/>
       <Content>
+        {user ? <AppDrawer/> : null}
         <Typography type='display3'>
           Quick Game Servers
         </Typography>
