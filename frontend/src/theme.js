@@ -1,7 +1,7 @@
 import {createMuiTheme} from 'material-ui/styles';
 
 const theme = createMuiTheme({
-  drawerWidth: 180,
+  drawerWidth: 200,
   zIndex: {
     mobileStepper: 900,
     menu: 1000,
