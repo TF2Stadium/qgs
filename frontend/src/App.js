@@ -5,11 +5,10 @@ import Button from 'material-ui/Button';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
-import IconButton from 'material-ui/IconButton';
 import theme from './theme';
 
 const Title = styled(Typography)`
-flex: 1
+flex: 1;
 `;
 
 const AppContainer = styled.div`
@@ -31,7 +30,19 @@ export default function App() {
       </AppBar>
       <AppDrawer/>
       <Content>
-        <h2>Welcome to React</h2>
+        <Typography type='display3'>
+          Quick Game Servers
+        </Typography>
+        <br/>
+        <Typography type='headline'>
+          Quickly and cheaply launch temporary TF2 servers anywhere in
+          the world!
+        </Typography>
+        <br/>
+        <Typography type='headline'>
+          <Button>Login</Button> with steam now to get started with 3$
+          of free credit (about 30 hours of 6v6 server time).
+        </Typography>
       </Content>
     </AppContainer>
   );
