@@ -1,6 +1,8 @@
 import {createService} from 'ineedthis';
 import dbService from './db';
+import ms from 'ms';
 import configurationService from './config';
+import {tx, oneOrNone} from '../dbHelpers';
 import express, {Router} from 'express';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
@@ -104,17 +106,39 @@ function createRouter(db, env, passport) {
     '/authorize/return',
     passport.authenticate('steam', { failureRedirect: '/login' }),
     p(async (req, res) => {
-      res.cookie('qgs-logged-in', 'true', { maxAge: 900000 });
+      const profile = req.user.profile._json,
+        {steamid} = profile;
+
+      const user = await tx(db, async () => {
+        const user = await oneOrNone(db.query(`
+SELECT * FROM person WHERE steamid=$1
+`, [steamid]));
+
+        if (!user) {
+          const newUser = await oneOrNone(db.query(`
+INSERT INTO person (steamid, profile) VALUES ($1, $2) RETURNING *
+`, [steamid, JSON.stringify(profile)]));
+          return newUser;
+        }
+
+        return user;
+      });
+
+      if (!user) {
+        throw new Error('Error signing up', steamid, profile);
+      }
+
+      res.cookie('qgs-logged-in', 'true', {maxAge: ms('3 days')});
       res.cookie(
         env.jwt.cookieName,
         jwt.sign({
           uid: 1,
           profile: req.user.profile._json.steamid
         }, env.jwt.secret, {
-          expiresIn: '7d',
+          expiresIn: '3 days',
           issuer: env.jwt.issuer
         }),
-        { maxAge: 900000, httpOnly: true }
+        { maxAge: ms('3 days'), httpOnly: true }
       );
 
       res.redirect('/');

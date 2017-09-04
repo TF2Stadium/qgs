@@ -27,6 +27,7 @@
     "localenv": "0.2.2",
     "morgan": "1.8.2",
     "most": "1.7.0",
+    "ms": "^2.0.0",
     "passport": "^0.4.0",
     "passport-steam": "^1.0.8",
     "pg": "7.2.0",
