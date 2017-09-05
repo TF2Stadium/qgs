@@ -5,7 +5,7 @@ import signin from './sign-in-through-steam.png';
 import theme from './theme';
 
 export const Content = styled.main`
-margin: 75px 20px 20px ${theme.drawerWidth}px;
+margin: 75px 20px 20px ${theme.drawerWidth + 10}px;
 `;
 
 export const LoginButton = (

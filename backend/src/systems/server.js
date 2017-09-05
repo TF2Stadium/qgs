@@ -142,10 +142,7 @@ INSERT INTO person (steamid, profile) VALUES ($1, $2) RETURNING *
       res.cookie('qgs-logged-in', 'true', {maxAge: ms('3 days')});
       res.cookie(
         env.jwt.cookieName,
-        jwt.sign({
-          uid: 1,
-          profile: req.user.profile._json.steamid
-        }, env.jwt.secret, {
+        jwt.sign({id: user.id}, env.jwt.secret, {
           expiresIn: '3 days',
           issuer: env.jwt.issuer
         }),

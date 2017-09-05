@@ -7,6 +7,10 @@ import registerServiceWorker from './registerServiceWorker';
 import {parse} from 'cookie';
 import {BrowserRouter} from 'react-router-dom';
 import {start, createService} from 'ineedthis';
+import {has} from 'ramda';
+import {
+  ApolloClient, createNetworkInterface, ApolloProvider
+} from 'react-apollo';
 
 const UserService = createService('qgs/client/user', {
   start: () => (async () => {
@@ -53,15 +57,35 @@ function useServices(
   };
 }
 
+const apolloClient = new ApolloClient({
+  networkInterface: createNetworkInterface({
+    uri: '/api/graphql',
+    credentials: 'same-origin',
+  }),
+  dataIdFromObject: o => {
+    // Default behavior:
+    if (has(o, 'id') && has(o, '__typename')) {
+      return `${o.__typename}:${o.id}`;
+    }
+    // Also, ServersConnection (`nodes` under a serverByOwnerId)
+    // should be cache together
+    if (o.__typename === 'ServersConnection') {
+      return `${o.__typename}:none`;
+    }
+  }
+});
+
 const ServicedApp = useServices(
   App, {user: UserService}, {delayRender: true}
 );
 
 ReactDOM.render((
   <MuiThemeProvider theme={theme}>
-    <BrowserRouter>
-      <ServicedApp/>
-    </BrowserRouter>
+    <ApolloProvider client={apolloClient}>
+      <BrowserRouter>
+        <ServicedApp/>
+      </BrowserRouter>
+    </ApolloProvider>
   </MuiThemeProvider>
 ), document.getElementById('root'));
 registerServiceWorker();

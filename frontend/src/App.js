@@ -1,10 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import AppDrawer from './Drawer';
+import AppDrawer from './AppDrawer';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
 import ServerCreate from './ServerCreate';
+import Server from './Server';
 import {Switch, Route, Redirect} from 'react-router-dom';
 import {Content, LoginButton} from './Components';
 
@@ -60,11 +61,14 @@ export default function App({isLoading, user}) {
           {user ? null : LoginButton}
         </Toolbar>
       </AppBar>
-      {user ? <AppDrawer/> : null}
+      {user ? <AppDrawer user={user}/> : null}
 
       {user ? (
         <Switch>
-          <Route path='/server/create' component={ServerCreate}/>
+          <Route path='/server/create'><ServerCreate user={user}/></Route>
+          <Route path='/server/:id' children={({match}) => (
+            <Server id={match.params.id}/>
+          )}/>
           <Route path='/about' component={About}/>
           <Route path='/' exact={true} component={Main}/>
           <Redirect to='/'/>

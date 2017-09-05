@@ -5,27 +5,18 @@ import Typography from 'material-ui/Typography';
 import TextField from 'material-ui/TextField';
 import {Content} from './Components';
 import {compose, withHandlers, withState} from 'recompose';
-import {always} from 'ramda';
-const noop = always(undefined);
-
-const regions = [
-  'us-west',
-  'us-central',
-  'us-east',
-  'eu-west',
-  'asia-east',
-  'asia-northeast',
-  'asia-southeast',
-  'australia-southeast',
-];
+import {gql, graphql} from 'react-apollo';
+import {locations} from './constants';
+import {withRouter} from 'react-router-dom'
 
 const defaultName = 'My new server';
 
-function ServerCreate({formData, updateForm, onSubmit=noop}) {
+/*eslint-disable react/jsx-no-duplicate-props */
+function ServerCreate({formData, updateForm, createServer}) {
   const RegionSelect = (
-    <select onChange={updateForm('region')}>
-      {regions.map((name, idx) => (
-        <option key={idx} value={name}>{name}</option>
+    <select onChange={updateForm('location')}>
+      {locations.map(({name, db}, idx) => (
+        <option key={idx} value={db}>{name}</option>
       ))}
     </select>
   );
@@ -40,10 +31,10 @@ function ServerCreate({formData, updateForm, onSubmit=noop}) {
       <TextField
         label='Server Name'
         defaultValue={defaultName}
-        onChange={updateForm('name')}
-        InputProps={{ placeholder: 'Server Name' }}
-        helperText={`Name you'll use to manage the server on this site`}
-        maxLength={80}/>
+        onChange={updateForm('title')}
+        inputProps={{maxLength: 80}}
+        InputProps={{placeholder: 'Server Name'}}
+        helperText={`Name you'll use to manage the server on this site`}/>
 
       <br/>
       <br/>
@@ -56,7 +47,8 @@ function ServerCreate({formData, updateForm, onSubmit=noop}) {
       <br/>
       <Button
         raised
-        disabled={!formData.region || !formData.name}
+        disabled={!formData.location || !formData.title}
+        onClick={createServer}
         color='primary'>
         Create Server
       </Button>
@@ -65,14 +57,46 @@ function ServerCreate({formData, updateForm, onSubmit=noop}) {
 }
 
 const enhance = compose(
+  withRouter,
+  graphql(gql`
+mutation ($ownerId: Int!, $title: String!, $location: ServerLocation!) {
+  createServer(input: {server: {
+    ownerId: $ownerId,
+    title: $title,
+    location: $location,
+    status: STOPPED
+  }}) {
+    server {
+      id
+    }
+    user: personByOwnerId {
+      servers: serversByOwnerId {
+        nodes {
+          id
+          title
+          hostname
+        }
+      }
+    }
+  }
+}
+`, {
+  props: ({ mutate }) => ({
+    submit: (formData) => mutate({ variables: formData })
+  })
+}),
   withState('formData', 'setForm', {
-    name: defaultName,
-    region: regions[0]
+    title: defaultName,
+    location: locations[0].db
   }),
   withHandlers({
     updateForm: ({setForm, formData}) => (name) => ({target}) => {
       setForm(Object.assign({}, formData, {[name]: target.value}));
-    }
+    },
+    createServer: ({history, user, submit, formData}) => (async () => {
+      const {data} = await submit({ownerId: user.id, ...formData});
+      history.push(`/server/${data.createServer.server.id}`)
+    }),
   })
 );
 

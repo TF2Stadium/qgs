@@ -7,9 +7,11 @@ import Divider from 'material-ui/Divider';
 import Collapse from 'material-ui/transitions/Collapse';
 import ExpandLess from 'material-ui-icons/ExpandLess';
 import ExpandMore from 'material-ui-icons/ExpandMore';
-import {withState} from 'recompose';
+import {compose, withState} from 'recompose';
 import {Link} from 'react-router-dom';
 import Add from 'material-ui-icons/Add';
+import {gql, graphql} from 'react-apollo';
+import {pathOr, isEmpty} from 'ramda';
 
 const DrawerInner = styled.div`
 // Make the items inside not wrap when transitioning:
@@ -29,9 +31,21 @@ width: ${theme.drawerWidth}px;
 
 const NestedItemText = styled(ListItemText)`
 text-indent: 20px;
+word-break: break-word;
 `;
 
-function AppDrawer({collapsed, setCollapsed}) {
+function AppDrawer({data, collapsed, setCollapsed}) {
+  const servers = pathOr([], ['user', 'servers', 'nodes'], data),
+    serverButtons = servers.map(s => (
+      <ListItem
+        key={s.id}
+        button
+        component={Link}
+        to={`/server/${s.id}`}>
+        <NestedItemText primary={s.title} />
+      </ListItem>
+    ));
+
   return (
     <Drawer type='permanent' open={true}>
       <DrawerInner>
@@ -43,21 +57,16 @@ function AppDrawer({collapsed, setCollapsed}) {
             <ListItemText primary='Launch Server' />
             <Add/>
           </ListItem>
-          <ListItem button onClick={() => setCollapsed(!collapsed)}>
+          <ListItem
+            button
+            disabled={isEmpty(servers)}
+            onClick={() => setCollapsed(!collapsed)}>
             <ListItemText primary='Servers' />
             {collapsed ? <ExpandMore/> : <ExpandLess/>}
           </ListItem>
           <Collapse in={collapsed}>
             <List>
-              <ListItem button>
-                <NestedItemText primary='Server 1' />
-              </ListItem>
-              <ListItem button>
-                <NestedItemText primary='Server 2 (long text long text)' />
-              </ListItem>
-              <ListItem button>
-                <NestedItemText primary='Server 3' />
-              </ListItem>
+              {serverButtons}
             </List>
           </Collapse>
 
@@ -88,4 +97,26 @@ function AppDrawer({collapsed, setCollapsed}) {
   );
 }
 
-export default withState('collapsed', 'setCollapsed', false)(AppDrawer);
+const enhance = compose(
+  graphql(gql`
+query user($id: Int!) {
+  user: personById(id: $id) {
+    id
+    steamid
+    profile
+    servers: serversByOwnerId {
+      nodes {
+        id
+        title
+        hostname
+      }
+    }
+  }
+}
+`, {
+  options: ({user}) => ({variables: {id: user.id}}),
+}),
+  withState('collapsed', 'setCollapsed', false),
+);
+
+export default enhance(AppDrawer);
