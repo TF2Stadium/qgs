@@ -1,0 +1,30 @@
+{
+  "apps": [
+    {
+      "cwd": "./backend",
+      "merge_logs": true,
+      "name": "backend:build",
+      "args": [
+        "run",
+        "build:watch"
+      ],
+      "script": "npm"
+    },
+    {
+      "cwd": "./backend",
+      "merge_logs": true,
+      "name": "backend",
+      "watch": ["bin", "dist"],
+      "script": "bin/server"
+    },
+    {
+      "cwd": "./frontend",
+      "merge_logs": true,
+      "name": "frontend",
+      "args": [
+        "start"
+      ],
+      "script": "yarn"
+    }
+  ]
+}
