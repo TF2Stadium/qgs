@@ -1,15 +1,15 @@
 import {createService} from 'ineedthis';
-import configuration from './config';
 import db from './db';
+import configuration from './config';
 import {postgraphql} from 'postgraphql';
 
 export default createService('qgs/postgraphql', {
-  dependencies: [configuration, db],
+  dependencies: [db],
   start: () => async ({
-    [configuration.serviceName]: {isDev, postgres: postgresConfig},
-    [db.serviceName]: postgres,
+    [db.serviceName]: pool,
+    [configuration.serviceName]: {isDev},
   }) => {
-    return postgraphql(postgresConfig, 'public', {
+    return postgraphql(pool, 'public', {
       graphqlRoute: '/api/graphql',
       graphiql: isDev,
       graphiqlRoute: '/api/graphiql',

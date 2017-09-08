@@ -1,15 +1,18 @@
 import {createService} from 'ineedthis';
 import configuration from './config';
-import {Client} from 'pg';
+import {Pool} from 'pg';
 
 export default createService('qgs/db', {
   dependencies: [configuration],
   start: () => async ({
     [configuration.serviceName]: {postgres: postgresConfig},
   }) => {
-    const client = new Client(postgresConfig);
-    await client.connect();
-    return client;
+    const pool = new Pool(postgresConfig);
+
+    // Test connection + get 1 client connected
+    await pool.query('SELECT 1+1;');
+
+    return pool;
   },
-  stop: (client) => client.end(),
+  stop: (pool) => pool.end(),
 });

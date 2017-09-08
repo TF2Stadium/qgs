@@ -24,11 +24,15 @@ export default createService('qgs/configuration', {
     publicHostname,
     steamApiKey: strEnv('STEAM_API_KEY', ''),
     postgres: {
+      // Compare to the config options here:
+      //  https://node-postgres.com/api/pool
       host: strEnv('PG_HOST', 'localhost'),
       port: intEnv('PG_PORT', 5432),
       database: strEnv('PG_DB', 'qgs'),
       user: strEnv('PG_USER', 'admin'),
       password: strEnv('PG_PASSWORD', ''),
+      max: intEnv('PG_CONNECTIONS', 10),
+      idleTimeoutMillis: intEnv('PG_IDLE_TIMEOUT', 0),
     },
   }),
 });
