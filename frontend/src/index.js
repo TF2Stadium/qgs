@@ -64,7 +64,7 @@ const apolloClient = new ApolloClient({
   }),
   dataIdFromObject: o => {
     // Default behavior:
-    if (has(o, 'id') && has(o, '__typename')) {
+    if (has('id', o) && has('__typename', o)) {
       return `${o.__typename}:${o.id}`;
     }
     // Also, ServersConnection (`nodes` under a serverByOwnerId)
