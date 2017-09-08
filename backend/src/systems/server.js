@@ -85,6 +85,7 @@ async function createServer(pool, env, postgraphql) {
     path: [
       '/api/authorize',
       '/api/authorize/return',
+      '/api/authorize/mock',
       '/api/graphiql',
       '/api/graphql',
       '/api/graph2',
