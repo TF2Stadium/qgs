@@ -7,23 +7,58 @@ import TextField from 'material-ui/TextField';
 import {Content} from './Components';
 import {compose, withHandlers, withState} from 'recompose';
 import {gql, graphql} from 'react-apollo';
-import {locations} from './constants';
+import {locationsByDb} from './constants';
 import {withRouter} from 'react-router-dom';
 
-function Server({data: {loading, server}}) {
+const Title = styled(Typography)`
+  word-break: break-word;
+`;
+
+const stateDescriptions = {
+  STOPPED: 'not running',
+  STARTING: 'starting up',
+  RUNNING: 'ready to use',
+  ADJUSTING: 'changing configuration',
+  STOPPING: 'shutting down'
+};
+
+function Server({data: {loading, server}, startServer, stopServer}) {
   if (loading) {
     return <CircularProgress/>;
+  }
+  if (!server) {
+    return <h3>Server Doesn't Exist!</h3>;
+  }
+
+  let StateButton;
+  if (server.status === 'STOPPED' || server.status === 'STOPPING') {
+    StateButton = (
+      <Button onClick={startServer} raised color='primary'>
+        Turn it on!
+      </Button>
+    );
+  } else {
+    StateButton = (
+      <Button onClick={stopServer} raised color='accent'>
+        Turn it off
+      </Button>
+    );
   }
 
   return (
     <Content>
-      <Typography type='display2'>
-        {server.title}
+      <Title type='headline'>{server.title}</Title>
+      <br/>
+      <Typography type='subheading'>
+        This server is in <b>{locationsByDb[server.location].human}</b>
+        {' '}and it is <b>{stateDescriptions[server.status]}</b>.
       </Typography>
 
-      <Typography type='body'>
+      {StateButton}
+
+      <Typography type='body2'>
         <ul>
-          {['status', 'location', 'hostname', 'rconPassword', 'password'].map(k => (
+          {['hostname', 'rconPassword', 'password'].map(k => (
             <li key={k}>
               <b>{k}</b>: {server[k]}
             </li>
@@ -31,7 +66,7 @@ function Server({data: {loading, server}}) {
         </ul>
       </Typography>
 
-      {<Button></Button>}
+      <Typography type='headline'>Action Log</Typography>
     </Content>
   );
 }
