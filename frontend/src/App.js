@@ -17,7 +17,7 @@ const AppContainer = styled.div`
 width: 100%;
 `;
 
-const Main = () => (
+const Main = (loggedIn = false) => (
   <Content>
     <Typography type='display3'>
       Quick Game Servers
@@ -28,11 +28,13 @@ const Main = () => (
       the world!
     </Typography>
     <br/>
-    <Typography type='headline'>
-      {LoginButton}
-      Login now to get started with 3$ of free credit
-      (about 30 hours of 6v6 server time).
-    </Typography>
+    {!loggedIn && (
+      <Typography type='headline'>
+        {LoginButton}
+        Login now to get started with 3$ of free credit
+        (about 30 hours of 6v6 server time).
+      </Typography>
+    )}
   </Content>
 );
 
@@ -70,7 +72,7 @@ export default function App({isLoading, user}) {
             <Server id={match.params.id}/>
           )}/>
           <Route path='/about' component={About}/>
-          <Route path='/' exact={true} component={Main}/>
+          <Route path='/' exact={true} component={() => Main(true)}/>
           <Redirect to='/'/>
         </Switch>
       ) : (
