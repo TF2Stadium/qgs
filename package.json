@@ -1,0 +1,14 @@
+{
+  "name": "qgs",
+  "version": "1.0.0",
+  "private": "true",
+  "description": "A project for quickly spinning up (and discarding) game servers on an as-needed basis.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "workspaces": [
+    "backend",
+    "frontend",
+    "db-migrations"
+  ]
+}
