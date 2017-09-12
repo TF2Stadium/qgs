@@ -143,6 +143,30 @@ async function createServer(pool, env, postgraphql) {
   const server = http.createServer(app);
   const wss = new WebSocket.Server({server});
 
+  function createFilter(listenTable, listenIds) {
+    return ({table, id, new: newRow}) => {
+      if (table !== listenTable) {
+        return false;
+      }
+
+      if (Array.isArray(listenIds) && listenIds.includes(id)) {
+        console.log('step 1', listenIds, id);
+        return true;
+      }
+
+      if (!Array.isArray(listenIds)) {
+        for (const k of Object.keys(listenIds)) {
+          if (Array.isArray(listenIds[k]) && listenIds[k].includes(newRow[k])) {
+            console.log('step 2', k, listenIds[k], newRow[k]);
+            return true;
+          }
+        }
+      }
+
+      return false;
+    };
+  }
+
   wss.on('connection', function connection(ws, req) {
     const location = url.parse(req.url, true),
       interests = {};
@@ -154,12 +178,10 @@ async function createServer(pool, env, postgraphql) {
       } catch (e) {
         return; // meh
       }
-      console.log('received: %s', req);
+      console.log('received: %s', JSON.stringify(req));
       if (req.listenTable) {
         interests[req.uuid] = {
-          filter: row => {
-            return true;
-          },
+          filter: createFilter(req.listenTable, req.listenIds),
           query: req.query,
           uuid: req.uuid,
           variables: req.variables,
@@ -177,9 +199,7 @@ async function createServer(pool, env, postgraphql) {
             .filter(({filter}) => filter(val))
             .map(async ({query, uuid, variables}) => {
               const result = await dographql(query, variables);
-              ws.send(JSON.stringify({
-                uuid, result
-              }));
+              ws.send(JSON.stringify({uuid, result}));
             })
         );
       },

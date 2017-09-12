@@ -8,10 +8,12 @@ import Collapse from 'material-ui/transitions/Collapse';
 import ExpandLess from 'material-ui-icons/ExpandLess';
 import ExpandMore from 'material-ui-icons/ExpandMore';
 import {compose, withState} from 'recompose';
-import {Link} from 'react-router-dom';
+import {Link, NavLink} from 'react-router-dom';
 import Add from 'material-ui-icons/Add';
 import {gql, graphql} from 'react-apollo';
 import {pathOr, isEmpty} from 'ramda';
+import {withRouter} from 'react-router-dom';
+import {withStyles} from 'material-ui/styles';
 
 const DrawerInner = styled.div`
 // Make the items inside not wrap when transitioning:
@@ -34,17 +36,35 @@ text-indent: 20px;
 word-break: break-word;
 `;
 
-function AppDrawer({data, collapsed, setCollapsed}) {
+const styles = {
+  activeLink: {
+    color: theme.palette.primary[800],
+  },
+};
+
+function AppDrawer({classes, location, data, collapsed, setCollapsed}) {
   const servers = pathOr([], ['user', 'servers', 'nodes'], data),
-    serverButtons = servers.map(s => (
-      <ListItem
-        key={s.id}
-        button
-        component={Link}
-        to={`/server/${s.id}`}>
-        <NestedItemText primary={s.title} />
-      </ListItem>
-    ));
+    serverButtons = servers.map(s => {
+      const url = `/server/${s.id}`,
+        isActive = location.pathname.startsWith(url);
+
+      return (
+        <ListItem
+          key={s.id}
+          button
+          component={Link}
+          style={!isActive ? {} : {
+            backgroundColor: theme.palette.grey[300],
+          }}
+          to={url}>
+          <NestedItemText
+            classes={{
+              text: isActive ? classes.activeLink : '',
+            }}
+            primary={s.title} />
+        </ListItem>
+      );
+    });
 
   return (
     <Drawer type='permanent' open={true}>
@@ -98,6 +118,10 @@ function AppDrawer({data, collapsed, setCollapsed}) {
 }
 
 const enhance = compose(
+  withRouter,
+
+  withStyles(styles),
+
   graphql(gql`
 query user($id: Int!) {
   user: personById(id: $id) {
@@ -116,7 +140,8 @@ query user($id: Int!) {
 `, {
   options: ({user}) => ({variables: {id: user.id}}),
 }),
-  withState('collapsed', 'setCollapsed', false),
+
+  withState('collapsed', 'setCollapsed', true),
 );
 
 export default enhance(AppDrawer);

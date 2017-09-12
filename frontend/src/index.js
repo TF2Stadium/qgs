@@ -1,61 +1,19 @@
-import React, {Component} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import App from './App';
 import {MuiThemeProvider} from 'material-ui/styles';
 import theme from './theme';
-import registerServiceWorker from './registerServiceWorker';
-import {parse} from 'cookie';
+//import registerServiceWorker from './registerServiceWorker';
 import {BrowserRouter} from 'react-router-dom';
-import {start, createService} from 'ineedthis';
+import UserService from './services/user';
+import WebsocketService from './services/websocket';
+import withServices from './services/withServices';
+import {compose, withContext} from 'recompose';
 import {has} from 'ramda';
 import {
   ApolloClient, createNetworkInterface, ApolloProvider
 } from 'react-apollo';
-
-const UserService = createService('qgs/client/user', {
-  start: () => (async () => {
-    const cookies = parse(document.cookie);
-    if (cookies['qgs-logged-in'] === 'true') {
-      return (await fetch('/api/user', {credentials: 'same-origin'})).json();
-    }
-    return null;
-  })
-});
-
-function useServices(
-  WrappedComponent,
-  servicesMap,
-  {loadingProp='isLoading', delayRender=false} = {}
-) {
-  return class extends Component {
-    constructor() {
-      super();
-      const childProps = {};
-      for (const k of Object.keys(servicesMap)) {
-        childProps[k] = null;
-      }
-      childProps[loadingProp] = true;
-      this.state = {childProps};
-    }
-
-    async componentWillMount() {
-      const sys = await start(Object.values(servicesMap));
-      const newChildProps = {};
-      for (const [prop, s] of Object.entries(servicesMap)) {
-        newChildProps[prop] = sys[s.serviceName];
-      }
-      newChildProps[loadingProp] = false;
-      this.setState(() => ({childProps: newChildProps}));
-    }
-
-    render() {
-      if (delayRender && this.state.childProps[loadingProp]) {
-        return null;
-      }
-      return <WrappedComponent {...this.props} {...this.state.childProps}/>
-    }
-  };
-}
 
 const apolloClient = new ApolloClient({
   networkInterface: createNetworkInterface({
@@ -72,12 +30,22 @@ const apolloClient = new ApolloClient({
     if (o.__typename === 'ServersConnection') {
       return `${o.__typename}:none`;
     }
+    if (o.__typename === 'ServerLogsConnection') {
+      return `${o.__typename}:none`;
+    }
   }
 });
 
-const ServicedApp = useServices(
-  App, {user: UserService}, {delayRender: true}
-);
+const ServicedApp = compose(
+  withServices({
+    user: UserService,
+    ws: WebsocketService(apolloClient),
+  }, {delayRender: true}),
+  withContext({
+    user: PropTypes.object,
+    ws: PropTypes.object,
+  }, ({user, ws}) => ({user, ws}))
+)(App);
 
 ReactDOM.render((
   <MuiThemeProvider theme={theme}>
@@ -88,4 +56,4 @@ ReactDOM.render((
     </ApolloProvider>
   </MuiThemeProvider>
 ), document.getElementById('root'));
-registerServiceWorker();
+//registerServiceWorker();

@@ -15,6 +15,7 @@
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.0.13",
     "recompose": "^0.25.0",
+    "reconnectingwebsocket": "^1.0.0",
     "styled-components": "^2.1.2"
   },
   "proxy": {
