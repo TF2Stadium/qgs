@@ -103,11 +103,9 @@ async function createServer(pool, env, postgraphql) {
       if (query) {
         query = parse(query);
 
-        console.log(query);
         query.definitions.forEach(q => {
           if (q.operation === 'mutation' && q.name) {
             const {value: name} = q.name;
-            console.log('mutation: ', name);
           } else if (q.operation === 'subscription') {
             q.operation = 'query';
             if (isEmpty(q.variableDefinitions)) {
@@ -150,14 +148,12 @@ async function createServer(pool, env, postgraphql) {
       }
 
       if (Array.isArray(listenIds) && listenIds.includes(id)) {
-        console.log('step 1', listenIds, id);
         return true;
       }
 
       if (!Array.isArray(listenIds)) {
         for (const k of Object.keys(listenIds)) {
           if (Array.isArray(listenIds[k]) && listenIds[k].includes(newRow[k])) {
-            console.log('step 2', k, listenIds[k], newRow[k]);
             return true;
           }
         }
@@ -178,7 +174,6 @@ async function createServer(pool, env, postgraphql) {
       } catch (e) {
         return; // meh
       }
-      console.log('received: %s', JSON.stringify(req));
       if (req.listenTable) {
         interests[req.uuid] = {
           filter: createFilter(req.listenTable, req.listenIds),
