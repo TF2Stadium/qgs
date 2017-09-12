@@ -7,7 +7,29 @@ const strEnv = (name, def) =>
   intEnv = compose(int, strEnv);
 
 const nodeEnv = strEnv('NODE_ENV', 'development'),
-  publicHostname = strEnv('PUBLIC_HOSTNAME', 'http://localhost:3000');
+  publicHostname = strEnv('PUBLIC_HOSTNAME', 'http://localhost:3000'),
+  postgres = {
+    // Compare to the config options here:
+    //  https://node-postgres.com/api/pool
+    host: strEnv('PG_HOST', 'localhost'),
+    port: intEnv('PG_PORT', 5432),
+    database: strEnv('PG_DB', 'qgs'),
+    user: strEnv('PG_USER', 'admin'),
+    password: strEnv('PG_PASSWORD', ''),
+    max: intEnv('PG_CONNECTIONS', 10),
+    idleTimeoutMillis: intEnv('PG_IDLE_TIMEOUT', 0),
+  },
+  jobqueuePostgres = {
+    // Compare to the config options here:
+    //  https://node-postgres.com/api/pool
+    host: strEnv('PG_JOBS_HOST', postgres.host),
+    port: intEnv('PG_JOBS_PORT', postgres.port),
+    database: strEnv('PG_JOBS_DB', postgres.database),
+    user: strEnv('PG_JOBS_USER', postgres.user),
+    password: strEnv('PG_JOBS_PASSWORD', postgres.password),
+    max: intEnv('PG_JOBS_CONNECTIONS', postgres.max),
+    idleTimeoutMillis: intEnv('PG_JOBS_IDLE_TIMEOUT', postgres.idleTimeoutMillis),
+  };
 
 export default createService('qgs/configuration', {
   dependencies: [],
@@ -23,16 +45,8 @@ export default createService('qgs/configuration', {
     },
     publicHostname,
     steamApiKey: strEnv('STEAM_API_KEY', ''),
-    postgres: {
-      // Compare to the config options here:
-      //  https://node-postgres.com/api/pool
-      host: strEnv('PG_HOST', 'localhost'),
-      port: intEnv('PG_PORT', 5432),
-      database: strEnv('PG_DB', 'qgs'),
-      user: strEnv('PG_USER', 'admin'),
-      password: strEnv('PG_PASSWORD', ''),
-      max: intEnv('PG_CONNECTIONS', 10),
-      idleTimeoutMillis: intEnv('PG_IDLE_TIMEOUT', 0),
-    },
+    postgres,
+    jobqueuePostgres,
+    jobqueueInit: {},
   }),
 });
