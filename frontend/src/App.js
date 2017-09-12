@@ -17,7 +17,7 @@ const AppContainer = styled.div`
 width: 100%;
 `;
 
-const Main = (loggedIn = false) => (
+const Main = ({loggedIn = false}) => (
   <Content>
     <Typography type='display3'>
       Quick Game Servers
@@ -28,7 +28,7 @@ const Main = (loggedIn = false) => (
       the world!
     </Typography>
     <br/>
-    {!loggedIn && (
+    {loggedIn ? null : (
       <Typography type='headline'>
         {LoginButton}
         Login now to get started with 3$ of free credit
@@ -72,7 +72,7 @@ export default function App({isLoading, user}) {
             <Server id={match.params.id}/>
           )}/>
           <Route path='/about' component={About}/>
-          <Route path='/' exact={true} component={() => Main(true)}/>
+          <Route path='/' exact={true} component={() => <Main loggedIn={true}/>}/>
           <Redirect to='/'/>
         </Switch>
       ) : (
