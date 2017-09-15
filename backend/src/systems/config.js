@@ -29,6 +29,10 @@ const nodeEnv = strEnv('NODE_ENV', 'development'),
     password: strEnv('PG_JOBS_PASSWORD', postgres.password),
     max: intEnv('PG_JOBS_CONNECTIONS', postgres.max),
     idleTimeoutMillis: intEnv('PG_JOBS_IDLE_TIMEOUT', postgres.idleTimeoutMillis),
+  },
+  gce = {
+    projectId: strEnv('GCE_PROJECT_ID', ''),
+    keyFilename: strEnv('GCE_KEY_FILENAME', ''),
   };
 
 export default createService('qgs/configuration', {
@@ -47,6 +51,6 @@ export default createService('qgs/configuration', {
     steamApiKey: strEnv('STEAM_API_KEY', ''),
     postgres,
     jobqueuePostgres,
-    jobqueueInit: {},
+    gce,
   }),
 });

@@ -15,14 +15,18 @@ start([
   .then(function (system) {
     var stopping = false;
     process.on('SIGINT', function () {
+      console.error('Shutting down...');
       if (stopping) {
         process.exit(1);
       }
       stopping = true;
-      stop(system);
+      stop(system).then(
+        x => console.log('done shutting down')
+      ).catch(
+        e => console.error('couldnt shut down', e)
+      );
     });
-  })
-  .catch(err => {
-    console.error(err);
+  }, function (err) {
+    console.error('Startup error:', err);
     process.exit(1);
   });

@@ -53,3 +53,15 @@ export async function tx(db, body) {
 
   return result;
 }
+
+export async function txPool(pool, body) {
+  let db;
+  try {
+    db = await pool.connect();
+    await tx(db, body);
+  } finally {
+    if (db) {
+      db.release();
+    }
+  }
+}

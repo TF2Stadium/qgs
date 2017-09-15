@@ -1,33 +1,40 @@
-export async function startServer(req, res) {
-  const {db, user, params} = req;
-
-  await db.query(`UPDATE server SET status = 'starting'
-WHERE id=$1 AND owner_id=$2;
-`, [params.id, user.id]);
-
-  await db.query(`INSERT INTO server_log
+const insertServerLog = `INSERT INTO server_log
 (server_id, actor_id, action_type, message)
 VALUES
-($1, $2, $3, $4);`, [
-  params.id, user.id, 'launch', null
-]);
+($1, $2, $3, $4);`;
+
+export async function startServer(req, res) {
+  const {db, user, params} = req,
+    serverId = parseInt(params.id, 10);
+
+  await db.query(insertServerLog, [
+    serverId, user.id, 'launch', null
+  ]);
+
+  await req.jobqueue.publish('server/start', {
+    serverId,
+    by: user.id,
+  }, {
+    singletonKey: `server:${serverId}`
+  });
 
   res.sendStatus(200);
 }
 
 export async function stopServer(req, res) {
-  const {db, user, params} = req;
+  const {db, user, params} = req,
+    serverId = parseInt(params.id, 10);
 
-  await db.query(`UPDATE server SET status = 'stopped'
-WHERE id=$1 AND owner_id=$2;
-`, [params.id, user.id]);
+  await db.query(insertServerLog, [
+    serverId, user.id, 'shutdown', null
+  ]);
 
-  await db.query(`INSERT INTO server_log
-(server_id, actor_id, action_type, message)
-VALUES
-($1, $2, $3, $4);`, [
-  params.id, user.id, 'shutdown', null
-]);
+  await req.jobqueue.publish('server/stop', {
+    serverId,
+    by: user.id,
+  }, {
+    singletonKey: `server:${serverId}`
+  });
 
   res.sendStatus(200);
 }

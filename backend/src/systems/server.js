@@ -4,6 +4,8 @@ import dbService from './db';
 import postgraphqlService from './postgraphql';
 import ms from 'ms';
 import configurationService from './config';
+import jobqueueService from './jobqueue';
+import gceService from './gce';
 import {tx, oneOrNone} from '../dbHelpers';
 import express, {Router} from 'express';
 import morgan from 'morgan';
@@ -18,12 +20,11 @@ import jwt from 'jsonwebtoken';
 import {Passport} from 'passport';
 import {Strategy as SteamStrategy} from 'passport-steam';
 import {startServer, stopServer} from '../routes/server';
-import * as most from 'most';
-const debug = createDebug('backend');
-
-import { graphql } from 'graphql';
+import {graphql} from 'graphql';
 import {parse, print} from 'graphql/language';
 import {createPostGraphQLSchema, withPostGraphQLContext} from 'postgraphql';
+import * as most from 'most';
+const debug = createDebug('backend');
 
 const withDb = pool => async (req, res, next) => {
   let client;
@@ -45,16 +46,27 @@ const withDb = pool => async (req, res, next) => {
 const p = routeFn => (req, res, next) => routeFn(req, res, next).catch(next);
 
 export default createService('qgs/server', {
-  dependencies: [dbService, configurationService, postgraphqlService],
-  start: () => ({
+  dependencies: [
+    dbService, configurationService, postgraphqlService,
+    gceService, jobqueueService
+  ],
+  start: () => async ({
     [dbService.serviceName]: pool,
     [configurationService.serviceName]: env,
     [postgraphqlService.serviceName]: postgraphql,
-  }) => createServer(pool, env, postgraphql),
-  stop: listener => new Promise(resolve => listener.close(resolve)),
+    [jobqueueService.serviceName]: jobqueue,
+    [gceService.serviceName]: gce,
+  }) => createServer(pool, env, postgraphql, jobqueue, gce),
+  stop({server, closeWSS}) {
+    debug('Stopping...');
+    closeWSS();
+    return new Promise(resolve => server.close(resolve)).then(
+      () => debug('Stopped')
+    );
+  }
 });
 
-async function createServer(pool, env, postgraphql) {
+async function createServer(pool, env, postgraphql, jobqueue, gce) {
   const schema = await createPostGraphQLSchema(pool);
   function dographql(query, variables) {
     return withPostGraphQLContext({pgPool: pool}, (context) => {
@@ -121,7 +133,7 @@ async function createServer(pool, env, postgraphql) {
   });
   app.use(postgraphql);
 
-  app.use('/api', createRouter(pool, env, passport));
+  app.use('/api', createRouter(pool, env, passport, jobqueue, gce));
 
   if (env.isProd) {
     app.use((err, req, res, next) => {
@@ -140,6 +152,10 @@ async function createServer(pool, env, postgraphql) {
 
   const server = http.createServer(app);
   const wss = new WebSocket.Server({server});
+  const clients = new Set();
+  function closeWSS() {
+    clients.forEach(c => c.close(503, 'Server shutting down'));
+  }
 
   function createFilter(listenTable, listenIds) {
     return ({table, id, new: newRow}) => {
@@ -166,6 +182,8 @@ async function createServer(pool, env, postgraphql) {
   wss.on('connection', function connection(ws, req) {
     const location = url.parse(req.url, true),
       interests = {};
+
+    clients.add(ws);
 
     ws.on('message', message => {
       let req;
@@ -200,17 +218,21 @@ async function createServer(pool, env, postgraphql) {
       },
     });
 
-    ws.on('close', () => {debug('ws closed'); sub.unsubscribe();});
+    ws.on('close', () => {
+      debug('ws closed');
+      clients.delete(ws);
+      sub.unsubscribe();
+    });
   });
 
-  const listener = await new Promise(resolve => {
-    const s = server.listen(env.port, () => resolve(s));
+  await new Promise(resolve => {
+    server.listen(env.port, () => resolve());
   });
   debug(`Listening on ${env.port}`);
-  return listener;
+  return {server, closeWSS};
 }
 
-function createRouter(pool, env, passport) {
+function createRouter(pool, env, passport, jobqueue, gce) {
   const router = Router({mergeParams: true});
 
   router.get('/authorize', passport.authenticate('steam'));
@@ -279,6 +301,12 @@ INSERT INTO person (steamid, profile) VALUES ($1, $2) RETURNING *
     res.clearCookie('qgs-logged-in');
     res.clearCookie(env.jwt.cookieName);
     res.redirect('/');
+  });
+
+  router.use((req, res, next) => {
+    req.jobqueue = jobqueue;
+    req.gce = gce;
+    next();
   });
 
   router.post('/server/:id/start', withDb(pool), p(startServer));
