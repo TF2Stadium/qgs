@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+#
+# Creates a TF2 server image on GCE, with a temporary "builder" instance
+
+set -e
+
+function stage() {
+  echo
+  echo :: "$@"
+}
+
+stage Create SSH Keys
+keys_dir=$(mktemp -d)
+ssh-keygen -N $'' -t ed25519 -f "$keys_dir/temp"
+# GCE wants ssh keys with "username:" at the front
+{ echo -n 'ubuntu:'; cat "$keys_dir/temp".pub; } > "$keys_dir/temp.gce.pub"
+
+builder_name="builder-tf2-image-$(</dev/urandom tr -dc a-z0-9 | head -c 12)"
+
+stage Launch builder instance: $builder_name
+instance_details=$(mktemp)
+>"$instance_details" gcloud --format=json \
+       compute instances create \
+       $builder_name \
+       --machine-type=n1-standard-2 \
+       --boot-disk-type=pd-ssd \
+       --no-boot-disk-auto-delete \
+       --no-service-account \
+       --no-scopes \
+       --image-project=ubuntu-os-cloud \
+       --image=ubuntu-1704-zesty-v20170811
+
+external_ip=$(jq -r '.[].networkInterfaces[].accessConfigs[]|select(.type=="ONE_TO_ONE_NAT").natIP' "$instance_details")
+rm "$instance_details"
+
+stage Instance is up at $external_ip
+# takes a bit for ubuntu to be fully reachable
+sleep 45s
+gcloud compute instances \
+       add-metadata $builder_name \
+       --metadata-from-file ssh-keys="$keys_dir/temp.gce.pub"
+
+function ssh-builder() {
+  ssh -o UserKnownHostsFile=/dev/null \
+      -o StrictHostKeyChecking=no \
+      -i "$keys_dir/temp" \
+      ubuntu@$external_ip "$@"
+}
+
+stage Starting TF2 server install
+ssh-builder < ./setup-tf2-on-zesty
+
+stage TF2 server install done, shutting off
+ssh-builder "sudo poweroff" || true
+sleep 10s
+
+stage TF2 server down, deleting builder
+gcloud -q compute instances delete $builder_name
+
+image_name="ubuntu-zesty-tf2-$(date +%Y%m%d)"
+stage Creating image: $image_name
+gcloud compute images create $image_name --source-disk=$builder_name
+gcloud -q compute disks delete $builder_name

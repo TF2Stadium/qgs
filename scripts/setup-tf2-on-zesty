@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+sudo dpkg --add-architecture i386
+sudo apt-get -y update
+sudo apt-get -y upgrade
+sudo apt-get -y install lib32z1 lib32ncurses5 lib32gcc1 lib32stdc++6 libcurl3-gnutls:i386
+
+sudo loginctl enable-linger ubuntu
+mkdir -p .config/systemd/user/
+
+for i in {1..4}; do
+cat <<EOF >.config/systemd/user/tf2-$i.service
+[Unit]
+Description=TF2-$i
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ubuntu/hlserver/
+ExecStart=/home/ubuntu/hlserver/tf2-$i.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF
+done
+
+systemctl --user daemon-reload
+
+# all from https://wiki.teamfortress.com/wiki/Linux_dedicated_server
+mkdir ./hlserver && cd hlserver
+wget http://media.steampowered.com/installer/steamcmd_linux.tar.gz
+tar zxf steamcmd_linux.tar.gz
+rm steamcmd_linux.tar.gz
+
+cat <<EOF >tf2_ds.txt
+login anonymous
+force_install_dir ./tf2
+app_update 232250
+quit
+EOF
+
+cat <<EOF >update.sh
+#!/bin/sh
+./steamcmd.sh +runscript tf2_ds.txt
+EOF
+chmod +x update.sh
+
+for i in {1..4}; do
+cat <<EOF >tf2-$i.sh
+#!/bin/sh
+tf2/srcds_run -console -game tf +sv_pure 1 +map cp_badlands +maxplayers 12
+EOF
+chmod +x tf2-$i.sh
+done
+
+# seems like we need to "prime" steamcmd by running it once..
+echo quit | ./steamcmd.sh
+
+# now download TF2 Dedicated Server
+./update.sh
+
+wget https://mms.alliedmods.net/mmsdrop/1.10/mmsource-1.10.7-git959-linux.tar.gz
+tar xzvf mmsource-1.10.7-git959-linux.tar.gz -C tf2/tf/
+
+wget https://sm.alliedmods.net/smdrop/1.8/sourcemod-1.8.0-git6027-linux.tar.gz
+tar xzvf sourcemod-1.8.0-git6027-linux.tar.gz -C tf2/tf/
