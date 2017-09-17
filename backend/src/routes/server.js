@@ -15,7 +15,8 @@ export async function startServer(req, res) {
     serverId,
     by: user.id,
   }, {
-    singletonKey: `server:${serverId}`
+    singletonKey: `server:${serverId}`,
+    expireIn: '3 minutes',
   });
 
   res.sendStatus(200);
@@ -33,7 +34,8 @@ export async function stopServer(req, res) {
     serverId,
     by: user.id,
   }, {
-    singletonKey: `server:${serverId}`
+    singletonKey: `server:${serverId}`,
+    expireIn: '3 minutes',
   });
 
   res.sendStatus(200);
