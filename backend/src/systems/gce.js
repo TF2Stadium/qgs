@@ -1,5 +1,6 @@
 import {createService} from 'ineedthis';
 import configuration from './config';
+import path from 'path';
 import gceCompute from '@google-cloud/compute';
 
 export default createService('qgs/gce', {
@@ -9,7 +10,7 @@ export default createService('qgs/gce', {
   }) => {
     const gce = gceCompute({
       projectId,
-      keyFilename
+      keyFilename: path.resolve(keyFilename)
     });
     return gce;
   }
