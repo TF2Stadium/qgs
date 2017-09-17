@@ -154,7 +154,7 @@ async function createServer(pool, env, postgraphql, jobqueue, gce) {
   const wss = new WebSocket.Server({server});
   const clients = new Set();
   function closeWSS() {
-    clients.forEach(c => c.close(503, 'Server shutting down'));
+    clients.forEach(c => c.close(1012, 'Server shutting down'));
   }
 
   function createFilter(listenTable, listenIds) {
