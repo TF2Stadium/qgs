@@ -33,6 +33,7 @@ const nodeEnv = strEnv('NODE_ENV', 'development'),
   gce = {
     projectId: strEnv('GCE_PROJECT_ID', ''),
     keyFilename: strEnv('GCE_KEY_FILENAME', ''),
+    tf2Image: strEnv('GCE_TF2_IMAGE', ''),
   };
 
 export default createService('qgs/configuration', {
