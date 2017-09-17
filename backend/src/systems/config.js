@@ -1,3 +1,4 @@
+/* @flow */
 import {createService} from 'ineedthis';
 import {compose, propOr} from 'ramda';
 

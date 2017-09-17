@@ -1,3 +1,4 @@
+/* @flow */
 import {createService} from 'ineedthis';
 import db from './db';
 import configuration from './config';

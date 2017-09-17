@@ -1,43 +1,43 @@
+/* @flow */
 /**
  * pg-promise style query-helpers for common pg query response
  * handling
  */
 
-function maybeAwait(resultOrPromise, fn) {
-  if (resultOrPromise.then) {
-    return resultOrPromise.then(result => fn(result));
+import type {ResultSet, Pool, Client, PoolClient} from 'pg';
+
+declare type ResultsPromise = Promise<ResultSet>;
+declare type Results = ResultSet | ResultsPromise;
+declare type Body = (...any) => any;
+
+export async function oneOrNone(resultOrPromise: Results) {
+  const {rows} = await resultOrPromise;
+
+  if (rows.length === 0) {
+    return null;
+  } else if (rows.length === 1) {
+    return rows[0];
   } else {
-    return fn(resultOrPromise);
+    throw new Error('Multiple rows were not expected.');
   }
 }
 
-export function oneOrNone(resultOrPromise) {
-  return maybeAwait(resultOrPromise, ({rows}) => {
-    if (rows.length === 0) {
-      return null;
-    } else if (rows.length === 1) {
-      return rows[0];
-    } else {
-      throw new Error('Multiple rows were not expected.');
-    }
-  });
+export async function one(resultOrPromise: Results) {
+  const {rows} = await resultOrPromise;
+
+  if (rows.length === 1) {
+    return rows[0];
+  } else {
+    throw new Error(`${rows.length} rows were not expected.`);
+  }
 }
 
-export function one(resultOrPromise) {
-  return maybeAwait(resultOrPromise, ({rows}) => {
-    if (rows.length === 1) {
-      return rows[0];
-    } else {
-      throw new Error(`${rows.length} rows were not expected.`);
-    }
-  });
+export async function any(resultOrPromise: Results) {
+  const {rows} = await resultOrPromise;
+  return rows;
 }
 
-export function any(resultOrPromise) {
-  return maybeAwait(resultOrPromise, ({rows}) => rows);
-}
-
-export async function tx(db, body) {
+export async function tx(db: Client | PoolClient, body: Body) {
   let result;
   try {
     await db.query('BEGIN');
@@ -54,7 +54,7 @@ export async function tx(db, body) {
   return result;
 }
 
-export async function txPool(pool, body) {
+export async function txPool(pool: Pool, body: Body) {
   let db;
   try {
     db = await pool.connect();

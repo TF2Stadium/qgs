@@ -1,3 +1,4 @@
+/* @flow */
 import {sample} from 'lodash';
 import {take} from 'ramda';
 import {createService} from 'ineedthis';
@@ -5,7 +6,7 @@ import dbService from './db';
 import configuration from './config';
 import gceService from './gce';
 import PgBoss from 'pg-boss';
-import {txPool} from '../dbHelpers';
+import type {ConnectionOptions} from 'pg-boss';
 import {statuses, locationsByName} from '../constants';
 import {getServer} from '../queries/server';
 import debugLib from 'debug';
@@ -39,15 +40,17 @@ function job(fn) {
 export default createService('qgs/jobqueue', {
   dependencies: [dbService, configuration, gceService],
   start: () => async ({
-    [configuration.serviceName]: {
-      jobqueuePostgres: postgresConfig,
-      gce: {tf2Image},
-    },
+    [configuration.serviceName]: config,
     [gceService.serviceName]: gce,
     [dbService.serviceName]: pool,
   }) => {
     debug('Starting...');
-    const queue = new PgBoss(postgresConfig);
+    const {
+      jobqueuePostgres: postgresConfig,
+      gce: {tf2Image},
+    } = config;
+
+    const queue = new PgBoss(((postgresConfig: any): ConnectionOptions));
     await queue.start();
 
     await queue.subscribe('server/start', {}, job(async (job) => {

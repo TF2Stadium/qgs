@@ -10,6 +10,7 @@
     "build": "rm -rf dist;babel --source-maps=inline --out-dir dist src",
     "build:watch": "npm run build -- -w",
     "lint": "eslint --cache src/**.js bin/**.js",
+    "flow": "flow check",
     "test": "echo \"Error: no test specified\""
   },
   "keywords": [],
@@ -43,7 +44,10 @@
     "babel-cli": "6.26.0",
     "babel-eslint": "7.2.3",
     "babel-preset-env": "1.6.0",
+    "babel-preset-flow": "6.23.0",
     "eslint": "4.6.0",
+    "eslint-plugin-flowtype": "2.35.1",
+    "flow-bin": "0.54.1",
     "nodemon": "1.11.0",
     "source-map-support": "0.4.16"
   }

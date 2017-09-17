@@ -1,3 +1,4 @@
+/* @flow */
 import {createService} from 'ineedthis';
 import configuration from './config';
 import {Pool} from 'pg';

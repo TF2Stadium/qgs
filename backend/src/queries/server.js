@@ -1,9 +1,17 @@
+/* @flow */
 import {one} from '../dbHelpers';
+import type {Queryable, ServerId, Server} from '../types';
 
-export const getServer = (db, serverId) => one(db.query(`
+export async function getServer(
+  db: Queryable, serverId: ServerId
+): Promise<Server> {
+  const server: Server = ((await one((db.query(`
 SELECT * FROM server WHERE id=$1
-`, [serverId]));
+`, [serverId])))): any);
 
-export const getStatus = (db, serverId) => one(db.query(`
+  return server;
+}
+
+export const getStatus = (db: Queryable, serverId: ServerId) => one(db.query(`
 SELECT status FROM server WHERE id=$1
 `, [serverId]));
