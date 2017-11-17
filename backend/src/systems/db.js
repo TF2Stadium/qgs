@@ -4,8 +4,9 @@ import configuration from './config';
 import {Pool} from 'pg';
 import debugLib from 'debug';
 const debug = debugLib('db');
+const listenerDebug = debugLib('db-listener');
 
-export default createService('qgs/db', {
+const dbService = createService('qgs/db', {
   dependencies: [configuration],
   start: () => async ({
     [configuration.serviceName]: {postgres: postgresConfig},
@@ -23,5 +24,23 @@ export default createService('qgs/db', {
     debug('Stopping...');
     await pool.end();
     debug('Stopped');
+  }
+});
+export default dbService;
+
+export const dbListenerService = createService('qgs/db-listener', {
+  dependencies: [dbService],
+  start: () => async ({
+    [dbService.serviceName]: pool,
+  }) => {
+    listenerDebug('Starting...');
+    const dbListener = await pool.connect();
+    listenerDebug('Started');
+    return dbListener;
+  },
+  async stop(listener) {
+    listenerDebug('Stopping...');
+    await listener.end();
+    listenerDebug('Stopped');
   }
 });

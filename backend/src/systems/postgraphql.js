@@ -3,9 +3,10 @@ import {createService} from 'ineedthis';
 import db from './db';
 import configuration from './config';
 import {postgraphql} from 'postgraphql';
+import {createPostGraphQLSchema} from 'postgraphql';
 
-export default createService('qgs/postgraphql', {
-  dependencies: [db],
+const postgraphqlService = createService('qgs/postgraphql', {
+  dependencies: [db, configuration],
   start: () => async ({
     [db.serviceName]: pool,
     [configuration.serviceName]: {isDev},
@@ -15,5 +16,15 @@ export default createService('qgs/postgraphql', {
       graphiql: isDev,
       graphiqlRoute: '/api/graphiql',
     });
+  },
+});
+export default postgraphqlService;
+
+export const schemaService = createService('qgs/postgraphql-schema', {
+  dependencies: [db],
+  start: () => async ({
+    [db.serviceName]: pool,
+  }) => {
+    return createPostGraphQLSchema(pool);
   },
 });

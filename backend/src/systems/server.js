@@ -1,7 +1,7 @@
 import {createService} from 'ineedthis';
 import {isEmpty} from 'ramda';
-import dbService from './db';
-import postgraphqlService from './postgraphql';
+import dbService, {dbListenerService} from './db';
+import postgraphqlService, {schemaService} from './postgraphql';
 import ms from 'ms';
 import configurationService from './config';
 import jobqueueService from './jobqueue';
@@ -22,7 +22,7 @@ import {Strategy as SteamStrategy} from 'passport-steam';
 import {startServer, stopServer} from '../routes/server';
 import {graphql} from 'graphql';
 import {parse, print} from 'graphql/language';
-import {createPostGraphQLSchema, withPostGraphQLContext} from 'postgraphql';
+import {withPostGraphQLContext} from 'postgraphql';
 import * as most from 'most';
 const debug = createDebug('backend');
 
@@ -47,16 +47,20 @@ const p = routeFn => (req, res, next) => routeFn(req, res, next).catch(next);
 
 export default createService('qgs/server', {
   dependencies: [
-    dbService, configurationService, postgraphqlService,
+    configurationService,
+    dbService, dbListenerService,
+    postgraphqlService, schemaService,
     gceService, jobqueueService
   ],
   start: () => async ({
     [dbService.serviceName]: pool,
+    [dbListenerService.serviceName]: listener,
     [configurationService.serviceName]: env,
     [postgraphqlService.serviceName]: postgraphql,
     [jobqueueService.serviceName]: jobqueue,
     [gceService.serviceName]: gce,
-  }) => createServer(pool, env, postgraphql, jobqueue, gce),
+    [schemaService.serviceName]: postgraphqlSchema
+  }) => createServer(pool, env, postgraphql, jobqueue, gce, postgraphqlSchema, listener),
   stop({server, closeWSS}) {
     debug('Stopping...');
     closeWSS();
@@ -66,8 +70,10 @@ export default createService('qgs/server', {
   }
 });
 
-async function createServer(pool, env, postgraphql, jobqueue, gce) {
-  const schema = await createPostGraphQLSchema(pool);
+async function createServer(
+  pool, env, postgraphql, jobqueue, gce, schema, dbListener
+) {
+  debug('Starting...');
   function dographql(query, variables) {
     return withPostGraphQLContext({pgPool: pool}, (context) => {
       return graphql(schema, query, null, context, variables);
@@ -142,7 +148,7 @@ async function createServer(pool, env, postgraphql, jobqueue, gce) {
     });
   }
 
-  const dbListener = await pool.connect();
+  debug('connecting to pool...');
   const s1 = most.fromEvent('notification', dbListener);
   s1.forEach(notif => {
     debug('db notif', notif);
