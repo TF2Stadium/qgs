@@ -57,7 +57,8 @@ sleep 10s
 stage TF2 server down, deleting builder
 gcloud -q compute instances delete $builder_name
 
-image_name="ubuntu-zesty-tf2-$(date +%Y%m%d)"
+randid=$(cat /dev/urandom | tr -dc a-z0-9 | head -c 12)
+image_name="ubuntu-zesty-tf2-$(date +%Y%m%d)-"$randid
 stage Creating image: $image_name
 gcloud compute images create $image_name --source-disk=$builder_name
 gcloud -q compute disks delete $builder_name
