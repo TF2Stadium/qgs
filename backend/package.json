@@ -27,6 +27,7 @@
     "express-jwt": "5.3.0",
     "graphql": "^0.11.3",
     "ineedthis": "0.0.9",
+    "killable": "1.0.0",
     "localenv": "0.2.2",
     "lodash": "4.17.4",
     "morgan": "1.8.2",

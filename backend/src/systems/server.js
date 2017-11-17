@@ -24,6 +24,7 @@ import {graphql} from 'graphql';
 import {parse, print} from 'graphql/language';
 import {withPostGraphQLContext} from 'postgraphql';
 import * as most from 'most';
+import killable from 'killable';
 const debug = createDebug('backend');
 
 const withDb = pool => async (req, res, next) => {
@@ -61,12 +62,16 @@ export default createService('qgs/server', {
     [gceService.serviceName]: gce,
     [schemaService.serviceName]: postgraphqlSchema
   }) => createServer(pool, env, postgraphql, jobqueue, gce, postgraphqlSchema, listener),
-  stop({server, closeWSS}) {
+  async stop({server, closeWSS}) {
     debug('Stopping...');
     closeWSS();
-    return new Promise(resolve => server.close(resolve)).then(
-      () => debug('Stopped')
-    );
+    debug('Stopped WS...');
+    await new Promise(resolve => {
+      server.kill(() => {
+        resolve();
+      });
+    });
+    debug('Stopped');
   }
 });
 
@@ -235,7 +240,7 @@ async function createServer(
     server.listen(env.port, () => resolve());
   });
   debug(`Listening on ${env.port}`);
-  return {server, closeWSS};
+  return {server: killable(server), closeWSS};
 }
 
 function createRouter(pool, env, passport, jobqueue, gce) {
