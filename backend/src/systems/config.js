@@ -44,6 +44,7 @@ export default createService('qgs/configuration', {
     isProd: nodeEnv === 'production',
     isDev: nodeEnv === 'development',
     port: intEnv('PORT', 8080),
+    cloudMonitorPeriod: intEnv('MONITOR_PERIOD', 20000),
     jwt: {
       issuer: strEnv('JWT_ISSUER', publicHostname),
       secret: new Buffer(strEnv('JWT_SECRET', 'AAAAAAAAA'), 'base64'),
