@@ -134,7 +134,7 @@ export default createService('qgs/jobqueue', {
   },
   async stop(queue) {
     debug('Stopping...');
-    await queue.disconnect();
+    await queue.stop();
     debug('Stopped');
   }
 });
