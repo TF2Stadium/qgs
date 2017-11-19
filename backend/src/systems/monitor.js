@@ -70,7 +70,7 @@ export default createService('qgs/monitor', {
         if (state.running) {
           createTimer();
         }
-      }, config.cloudMonitorPeriod/10);
+      }, config.cloudMonitorPeriod);
     }
 
     createTimer();
