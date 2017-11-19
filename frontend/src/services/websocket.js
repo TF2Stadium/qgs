@@ -22,13 +22,23 @@ export default (apollo) => createService('qgs/websocket', {
 
       subscriptions[uuid] = {query: gql(query), variables};
 
-      ws.send(JSON.stringify({
-        listenTable,
-        listenIds,
-        uuid,
-        variables,
-        query
-      }));
+      function listen() {
+        ws.send(JSON.stringify({
+          listenTable,
+          listenIds,
+          uuid,
+          variables,
+          query
+        }));
+      }
+
+      if (ws.readyState === WebSocket.OPEN) {
+        listen();
+      } else {
+        ws.addEventListener('open', () => {
+          listen();
+        });
+      }
 
       const unsubscribe = () => {
         ws.send(JSON.stringify({stopListening: true, uuid}));
