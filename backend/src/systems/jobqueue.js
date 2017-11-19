@@ -94,7 +94,6 @@ export default createService('qgs/jobqueue', {
       }
 
       await new Promise(r=>setTimeout(()=>r(), 10000));
-      await pool.query(setStatus, ['running', by, serverId]);
     }));
 
     await queue.subscribe('server/stop', {}, job(async (job) => {
