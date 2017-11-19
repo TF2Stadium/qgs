@@ -30,8 +30,8 @@ async function monitorServers({
   for (const i of instances) {
     const s = servers[`gce:${i.zone.name}/${i.name}#1`];
     debug(i.name, i.id, i.zone.name, s);
-    if (s) {
-      const ip = i.metadata.networkInterfaces[0].accessConfigs[0].natIP;
+    const ip = i.metadata.networkInterfaces[0].accessConfigs[0].natIP;
+    if (s && ip) {
       debug('Found: ', ip, 'for server', s.id);
       await pool.query(updateHostname, [s.id, ip]);
     }
