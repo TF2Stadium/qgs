@@ -4,14 +4,16 @@ import {createService} from 'ineedthis';
 import dbService from './db';
 import configuration from './config';
 import gceService from './gce';
-import {statuses, locationsByName} from '../constants';
-import {getServer} from '../queries/server';
 import debugLib from 'debug';
 const debug = debugLib('monitor');
 
 const getStartingServers = `select id, instance
 from server
-where status='running' and hostname is null;`;
+where status='starting' and hostname is null;`;
+
+const updateHostname = `UPDATE server
+SET status='running', hostname=$2
+WHERE id=$1;`;
 
 async function monitorServers({
   [dbService.serviceName]: pool,
@@ -23,9 +25,16 @@ async function monitorServers({
     gce.getVMs()
   ]);
 
-  debug(indexBy(prop('instance'), startingServers));
+  const servers = indexBy(prop('instance'), startingServers);
+  debug(servers);
   for (const i of instances) {
-    debug(i.name, i.id, i.zone.name);
+    const s = servers[`gce:${i.zone.name}/${i.name}#1`];
+    debug(i.name, i.id, i.zone.name, s);
+    if (s) {
+      const ip = i.metadata.networkInterfaces[0].accessConfigs[0].natIP;
+      debug('Found: ', ip, 'for server', s.id);
+      await pool.query(updateHostname, [s.id, ip]);
+    }
   }
 
   await new Promise(resolve => setTimeout(resolve, 300));
