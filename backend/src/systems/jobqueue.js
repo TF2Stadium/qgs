@@ -20,7 +20,7 @@ SET status='starting', instance=$1
 WHERE owner_id=$2 and id=$3`;
 
 const stop = `UPDATE server
-SET status='stopping', instance=null
+SET status='stopping', instance=null, hostname=null
 WHERE owner_id=$1 and id=$2`;
 
 function job(fn) {
