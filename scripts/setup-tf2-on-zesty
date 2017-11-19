@@ -10,6 +10,7 @@ mkdir -p .config/systemd/user/
 
 # Random fix to get sysmted user services working:
 echo 'export XDG_RUNTIME_DIR=/run/user/`id -u`' >> ~ubuntu/.profile
+cp .profile .bash_profile
 export XDG_RUNTIME_DIR=/run/user/`id -u`
 
 # all from https://wiki.teamfortress.com/wiki/Linux_dedicated_server
@@ -31,27 +32,6 @@ cat <<EOF >update.sh
 EOF
 chmod +x update.sh
 
-for i in {1..4}; do
-  cat <<EOF >tf2-$i.sh
-#!/bin/sh
-tf2/srcds_run -console -game tf +sv_pure 1 +map cp_badlands -strictportbind +maxplayers 12 +servercfgfile server-$i.cfg
-EOF
-  chmod +x tf2-$i.sh
-
-  cat <<EOF > ~ubuntu/.config/systemd/user/tf2-$i.service
-[Unit]
-Description=TF2-$i
-
-[Service]
-Type=simple
-WorkingDirectory=/home/ubuntu/hlserver/
-ExecStart=/home/ubuntu/hlserver/tf2-$i.sh
-
-[Install]
-WantedBy=multi-user.target
-EOF
-done
-
 # seems like we need to "prime" steamcmd by running it once..
 echo quit | ./steamcmd.sh
 
@@ -69,6 +49,43 @@ rm sourcemod-1.8.0-git6027-linux.tar.gz
 wget http://tftrue.esport-tools.net/TFTrue.zip
 unzip TFTrue.zip -x Readme.txt -d tf2/tf/
 rm TFTrue.zip
+
+mkdir cfgs
+cd cfgs/
+git init
+git remote add -f origin https://github.com/mkrl/cfgtf
+git config core.sparseCheckout true
+echo "server/cfg/" >> .git/info/sparse-checkout
+git pull origin master
+cd server/cfg/
+cp ugc/* oz/* etf2l/* -t ~ubuntu/hlserver/tf2/tf/cfg/
+
+cd
+
+for i in {1..4}; do
+  cat <<EOF > ~ubuntu/hlserver/tf2/tf/cfg/server-$i.cfg
+rcon_password abcdef
+EOF
+
+  cat <<EOF > ~ubuntu/hlserver/tf2-$i.sh
+#!/bin/sh
+tf2/srcds_run -console -game tf +sv_pure 1 +map cp_badlands -strictportbind +maxplayers 12 +servercfgfile server-$i.cfg
+EOF
+  chmod +x ~ubuntu/hlserver/tf2-$i.sh
+
+  cat <<EOF > ~ubuntu/.config/systemd/user/tf2-$i.service
+[Unit]
+Description=TF2-$i
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ubuntu/hlserver/
+ExecStart=/home/ubuntu/hlserver/tf2-$i.sh
+
+[Install]
+WantedBy=default.target
+EOF
+done
 
 systemctl --user daemon-reload
 systemctl --user enable tf2-1
