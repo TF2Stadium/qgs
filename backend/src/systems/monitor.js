@@ -43,21 +43,25 @@ export default createService('qgs/monitor', {
       [configuration.serviceName]: config,
     } = system;
 
-    const state = {};
+    const state = {
+      running: true
+    };
 
     function createTimer() {
       state.timer = setTimeout(async () => {
-        debug('run...');
+        debug('Run...');
         try {
           state.currentPromise = monitorServers(system);
           await state.currentPromise;
         } catch (e) {
-          console.error(e);
+          console.error(e); //eslint-disable-line no-console
         }
-        debug('done');
+        debug('Done');
 
-        createTimer();
-      }, config.cloudMonitorPeriod);
+        if (state.running) {
+          createTimer();
+        }
+      }, config.cloudMonitorPeriod/10);
     }
 
     createTimer();
@@ -67,6 +71,7 @@ export default createService('qgs/monitor', {
   },
   async stop(state) {
     debug('Stopping...');
+    state.running = false;
     if (state.timer) {
       clearTimeout(state.timer);
     }
