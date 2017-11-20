@@ -2,7 +2,7 @@
 
 require('localenv');
 require('babel-polyfill');
-require('source-map-support').install();
+require('source-map-support/register');
 
 var ineedthis = require('ineedthis'),
   start = ineedthis.start,
@@ -11,6 +11,7 @@ var ineedthis = require('ineedthis'),
 start([
   require('../dist/systems/server').default,
   require('../dist/systems/jobqueue').default,
+  require('../dist/systems/monitor').default,
 ])
   .then(function (system) {
     var stopping = false;
