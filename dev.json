@@ -14,8 +14,12 @@
       "cwd": "./backend",
       "merge_logs": true,
       "name": "backend",
-      "watch": ["bin", "dist"],
-      "script": "bin/server"
+      "watch": [".env", ".env.local"],
+      "script": "npm",
+      "args": [
+        "run",
+        "debug"
+      ]
     },
     {
       "cwd": "./frontend",
