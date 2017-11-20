@@ -36,8 +36,6 @@ async function monitorServers({
       await pool.query(updateHostname, [s.id, ip]);
     }
   }
-
-  await new Promise(resolve => setTimeout(resolve, 300));
 }
 
 /**
