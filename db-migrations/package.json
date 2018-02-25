@@ -1,0 +1,19 @@
+{
+  "name": "db-migrations",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "create": "db-migrate create",
+    "up": "db-migrate up",
+    "down": "db-migrate down",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "db-migrate": "^0.10.0-beta.23",
+    "db-migrate-pg": "^0.2.5"
+  }
+}
