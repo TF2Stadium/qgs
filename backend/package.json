@@ -20,6 +20,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "@google-cloud/compute": "^0.8.0",
+    "@ineedthis/express": "^0.0.3",
     "babel-polyfill": "6.26.0",
     "backend": "^0.0.0",
     "body-parser": "1.17.2",
@@ -28,7 +29,7 @@
     "express": "4.15.4",
     "express-jwt": "5.3.0",
     "graphql": "^0.11.3",
-    "ineedthis": "0.0.14",
+    "ineedthis": "0.0.19",
     "killable": "1.0.0",
     "localenv": "0.2.2",
     "lodash": "4.17.4",
