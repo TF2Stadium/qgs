@@ -33,7 +33,7 @@
     "localenv": "0.2.2",
     "lodash": "4.17.4",
     "morgan": "1.8.2",
-    "most": "1.7.0",
+    "most": "1.7.3",
     "ms": "^2.0.0",
     "passport": "^0.4.0",
     "passport-steam": "^1.0.8",
@@ -50,7 +50,7 @@
     "babel-preset-flow": "6.23.0",
     "eslint": "4.6.0",
     "eslint-plugin-flowtype": "2.35.1",
-    "flow-bin": "0.54.1",
+    "flow-bin": "0.66.0",
     "nodemon": "1.11.0",
     "source-map-support": "0.4.16"
   }

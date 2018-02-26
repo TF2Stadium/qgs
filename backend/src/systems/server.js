@@ -54,7 +54,7 @@ export default createService('qgs/server', {
     gceService, jobqueueService
   ],
   start: () => async ({
-    [dbService.serviceName]: pool,
+    [dbService.serviceName]: {pool},
     [dbListenerService.serviceName]: listener,
     [configurationService.serviceName]: env,
     [postgraphqlService.serviceName]: postgraphql,

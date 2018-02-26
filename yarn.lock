@@ -38,6 +38,18 @@
     is "^3.0.1"
     string-format-obj "^1.0.0"
 
+"@ineedthis/express@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@ineedthis/express/-/express-0.0.3.tgz#c12694d87f27d3fe540d45a73083e95e2fc24bce"
+  dependencies:
+    killable "1.0.0"
+
+"@ineedthis/resolve@1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@ineedthis/resolve/-/resolve-1.6.0.tgz#0c9c7e7a1d5ebe4d3eccafddc6d3c681c877b9d4"
+  dependencies:
+    path-parse "^1.0.5"
+
 "@most/multicast@^1.2.5":
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@most/multicast/-/multicast-1.3.0.tgz#e01574840df634478ac3fabd164c6e830fb3b966"
@@ -3202,9 +3214,9 @@ flatten@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/flatten/-/flatten-1.0.2.tgz#dae46a9d78fbe25292258cc1e780a41d95c03782"
 
-flow-bin@0.54.1:
-  version "0.54.1"
-  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.54.1.tgz#7101bcccf006dc0652714a8aef0c72078a760510"
+flow-bin@0.66.0:
+  version "0.66.0"
+  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.66.0.tgz#a96dde7015dc3343fd552a7b4963c02be705ca26"
 
 for-in@^1.0.1:
   version "1.0.2"
@@ -3917,21 +3929,15 @@ indexof@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/indexof/-/indexof-0.0.1.tgz#82dc336d232b9062179d05ab3293a66059fd435d"
 
-ineedthis@0.0.14:
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/ineedthis/-/ineedthis-0.0.14.tgz#9486af1e1ca1d9183d7338bcd4fe1497185dfd3c"
+ineedthis@0.0.19:
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/ineedthis/-/ineedthis-0.0.19.tgz#c269165be301d72e187b9058e48b73f26de1105d"
   dependencies:
+    "@ineedthis/resolve" "1.6.0"
     babel-runtime "^6.22.0"
     callsite "1.0.0"
     chokidar "1.7.0"
     require-reload "0.2.2"
-    resolve "1.5.0"
-
-ineedthis@0.0.9:
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/ineedthis/-/ineedthis-0.0.9.tgz#ce07a3e5ddb2ad975bf905f1e4cc358bf1f66035"
-  dependencies:
-    babel-runtime "^6.22.0"
 
 infinity-agent@^2.0.0:
   version "2.0.3"
@@ -5326,9 +5332,9 @@ morgan@1.8.2:
     on-finished "~2.3.0"
     on-headers "~1.0.1"
 
-most@1.7.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/most/-/most-1.7.0.tgz#3f2478a5d6bf6bce687e6e4d8e973ca1a395cd1a"
+most@1.7.3:
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/most/-/most-1.7.3.tgz#406c31a66d73aa16957816fdf96965e27df84f1a"
   dependencies:
     "@most/multicast" "^1.2.5"
     "@most/prelude" "^1.4.0"
@@ -7184,7 +7190,7 @@ resolve@1.1.7:
   version "1.1.7"
   resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.1.7.tgz#203114d82ad2c5ed9e8e0411b3932875e889e97b"
 
-resolve@1.5.0, resolve@^1.1.6, resolve@^1.3.2, resolve@^1.5.0:
+resolve@^1.1.6, resolve@^1.3.2, resolve@^1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.5.0.tgz#1f09acce796c9a762579f31b2c1cc4c3cddf9f36"
   dependencies:

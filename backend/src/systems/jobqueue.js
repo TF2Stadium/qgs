@@ -42,7 +42,7 @@ export default createService('qgs/jobqueue', {
   start: () => async ({
     [configuration.serviceName]: config,
     [gceService.serviceName]: gce,
-    [dbService.serviceName]: pool,
+    [dbService.serviceName]: {pool},
   }) => {
     debug('Starting...');
     const {

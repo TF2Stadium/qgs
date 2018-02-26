@@ -23,8 +23,7 @@ const dbService = createService('qgs/db', {
     await pool.query('SELECT 1+1;');
 
     debug('Started');
-    pool[clientsKey] = clients;
-    return pool;
+    return {pool, clients};
   },
   async stop(pool) {
     debug('Stopping...');
@@ -44,7 +43,7 @@ export default dbService;
 export const dbListenerService = createService('qgs/db-listener', {
   dependencies: [dbService],
   start: () => async ({
-    [dbService.serviceName]: pool,
+    [dbService.serviceName]: {pool},
   }) => {
     listenerDebug('Starting...');
     const dbListener = await pool.connect();

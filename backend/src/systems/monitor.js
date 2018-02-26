@@ -16,7 +16,7 @@ SET status='running', hostname=$2
 WHERE id=$1;`;
 
 async function monitorServers({
-  [dbService.serviceName]: pool,
+  [dbService.serviceName]: {pool},
   [gceService.serviceName]: gce,
 }) {
   debug('Checking servers');
@@ -50,8 +50,10 @@ export default createService('qgs/monitor', {
       [configuration.serviceName]: config,
     } = system;
 
-    const state = {
-      running: true
+    const state: {running: bool, timer?: TimeoutID, currentPromise?: Promise<any>} = {
+      running: true,
+      timer: undefined,
+      currentPromise: undefined
     };
 
     function createTimer() {

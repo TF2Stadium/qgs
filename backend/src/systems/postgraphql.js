@@ -1,6 +1,6 @@
 /* @flow */
 import {createService} from 'ineedthis';
-import db from './db';
+import dbService from './db';
 import configuration from './config';
 import {postgraphql} from 'postgraphql';
 import {createPostGraphQLSchema} from 'postgraphql';
@@ -9,9 +9,9 @@ const debug = debugLib('postgraphql');
 const schemaDebug = debugLib('postgraphql-schema');
 
 const postgraphqlService = createService('qgs/postgraphql', {
-  dependencies: [db, configuration],
+  dependencies: [dbService, configuration],
   start: () => async ({
-    [db.serviceName]: pool,
+    [dbService.serviceName]: {pool},
     [configuration.serviceName]: {isDev},
   }) => {
     debug('Starting...');
@@ -28,9 +28,9 @@ const postgraphqlService = createService('qgs/postgraphql', {
 export default postgraphqlService;
 
 export const schemaService = createService('qgs/postgraphql-schema', {
-  dependencies: [db],
+  dependencies: [dbService],
   start: () => async ({
-    [db.serviceName]: pool,
+    [dbService.serviceName]: {pool},
   }) => {
     schemaDebug('Starting...');
     const schema = await createPostGraphQLSchema(pool);
