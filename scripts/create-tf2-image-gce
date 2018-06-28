@@ -46,6 +46,18 @@ function ssh-builder() {
       ubuntu@$external_ip "$@"
 }
 
+tries=10
+while ! ssh-builder "echo working" ; do
+  sleep 2
+
+  tries=$((tries - 1))
+  if [[ $tries -eq 0 ]]; then
+    echo Instance not up in time
+    exit 1
+  fi
+  echo $tries tries remaining
+done
+
 stage Starting TF2 server install
 ssh-builder < ./setup-tf2-on-zesty
 
