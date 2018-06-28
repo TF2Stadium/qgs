@@ -28,7 +28,7 @@ instance_details=$(mktemp)
        --no-service-account \
        --no-scopes \
        --image-project=ubuntu-os-cloud \
-       --image=ubuntu-1704-zesty-v20170811 \
+       --image=ubuntu-1710-artful-v20180612 \
        --metadata-from-file ssh-keys="$keys_dir/temp.gce.pub"
 
 external_ip=$(jq -r '.[].networkInterfaces[].accessConfigs[]|select(.type=="ONE_TO_ONE_NAT").natIP' "$instance_details")
