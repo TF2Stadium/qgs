@@ -28,17 +28,15 @@ instance_details=$(mktemp)
        --no-service-account \
        --no-scopes \
        --image-project=ubuntu-os-cloud \
-       --image=ubuntu-1704-zesty-v20170811
+       --image=ubuntu-1704-zesty-v20170811 \
+       --metadata-from-file ssh-keys="$keys_dir/temp.gce.pub"
 
 external_ip=$(jq -r '.[].networkInterfaces[].accessConfigs[]|select(.type=="ONE_TO_ONE_NAT").natIP' "$instance_details")
 rm "$instance_details"
 
 stage Instance is up at $external_ip
 # takes a bit for ubuntu to be fully reachable
-sleep 45s
-gcloud compute instances \
-       add-metadata $builder_name \
-       --metadata-from-file ssh-keys="$keys_dir/temp.gce.pub"
+sleep 50s
 
 function ssh-builder() {
   ssh -o UserKnownHostsFile=/dev/null \
