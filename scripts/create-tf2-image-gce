@@ -39,7 +39,8 @@ stage Instance is up at $external_ip
 sleep 50s
 
 function ssh-builder() {
-  ssh -o UserKnownHostsFile=/dev/null \
+  ssh -o IdentitiesOnly=yes \
+      -o UserKnownHostsFile=/dev/null \
       -o StrictHostKeyChecking=no \
       -i "$keys_dir/temp" \
       ubuntu@$external_ip "$@"
