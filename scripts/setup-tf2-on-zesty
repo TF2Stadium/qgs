@@ -3,7 +3,7 @@
 sudo dpkg --add-architecture i386
 sudo apt-get -y update
 sudo apt-get -y upgrade
-sudo apt-get -y install unzip lib32z1 lib32ncurses5 lib32gcc1 lib32stdc++6 libcurl3-gnutls:i386
+sudo apt-get -y install unzip lib32z1 lib32ncurses5 lib32gcc1 lib32stdc++6 libcurl3-gnutls:i386 git curl
 
 sudo loginctl enable-linger ubuntu
 mkdir -p .config/systemd/user/
@@ -38,13 +38,17 @@ echo quit | ./steamcmd.sh
 # now download TF2 Dedicated Server
 ./update.sh
 
-wget https://mms.alliedmods.net/mmsdrop/1.10/mmsource-1.10.7-git959-linux.tar.gz
-tar xzvf mmsource-1.10.7-git959-linux.tar.gz -C tf2/tf/
-rm mmsource-1.10.7-git959-linux.tar.gz
+MMOD_BASE="https://mms.alliedmods.net/mmsdrop/1.11/"
+LATEST_MMOD=$(curl "${MMOD_BASE}"mmsource-latest-linux)
+wget -O mmsource.tar.gz "${MMOD_BASE}${LATEST_MMOD}"
+tar xzvf mmsource.tar.gz -C tf2/tf/
+rm mmsource.tar.gz
 
-wget https://sm.alliedmods.net/smdrop/1.8/sourcemod-1.8.0-git6027-linux.tar.gz
-tar xzvf sourcemod-1.8.0-git6027-linux.tar.gz -C tf2/tf/
-rm sourcemod-1.8.0-git6027-linux.tar.gz
+SMOD_BASE="https://sm.alliedmods.net/smdrop/1.11/"
+LATEST_SMOD=$(curl "${SMOD_BASE}"sourcemod-latest-linux)
+wget -O sourcemod.tar.gz "${SMOD_BASE}${LATEST_SMOD}"
+tar xzvf sourcemod.tar.gz -C tf2/tf/
+rm sourcemod.tar.gz
 
 wget http://tftrue.esport-tools.net/TFTrue.zip
 unzip TFTrue.zip -x Readme.txt -d tf2/tf/

@@ -28,7 +28,7 @@ instance_details=$(mktemp)
        --no-service-account \
        --no-scopes \
        --image-project=ubuntu-os-cloud \
-       --image=ubuntu-1710-artful-v20180612 \
+       --image=ubuntu-minimal-1804-bionic-v20200317 \
        --metadata-from-file ssh-keys="$keys_dir/temp.gce.pub"
 
 external_ip=$(jq -r '.[].networkInterfaces[].accessConfigs[]|select(.type=="ONE_TO_ONE_NAT").natIP' "$instance_details")
@@ -69,7 +69,7 @@ stage TF2 server down, deleting builder
 gcloud -q compute instances delete $builder_name
 
 randid=$(cat /dev/urandom | tr -dc a-z0-9 | head -c 12)
-image_name="ubuntu-zesty-tf2-$(date +%Y%m%d)-"$randid
+image_name="ubuntu-tf2-$(date +%Y%m%d)-"$randid
 stage Creating image: $image_name
 gcloud compute images create $image_name --source-disk=$builder_name
 gcloud -q compute disks delete $builder_name
