@@ -27,7 +27,7 @@
     "cookie-parser": "1.4.3",
     "debug": "3.0.1",
     "express": "4.15.4",
-    "express-jwt": "5.3.0",
+    "express-jwt": "6.0.0",
     "graphql": "^0.11.3",
     "ineedthis": "0.0.19",
     "killable": "1.0.0",
